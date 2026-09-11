@@ -1,0 +1,203 @@
+name: Publish to PyPI
+
+# Triggers:
+#   - push of a `v*.*.*` tag (e.g. `v1.19.0`).
+#   - manual dispatch with an explicit version.
+#
+# The `resolve-version` job strips the tag (or takes the dispatch input) once
+# and hands that version to the build, which asserts `project.version` in
+# pyproject.toml equals it and fails before `uv build` when it does not — so a
+# mistyped tag stops the run ahead of any upload, rather than shipping the
+# version that happens to be checked out. `verify` reads the same value.
+#
+# Authentication uses PyPI Trusted Publishing (OIDC). Configure on PyPI at
+# https://pypi.org/manage/account/publishing/ for the `dhis2w-security`
+# project, pointing the workflow file at `pypi-publish.yml` and the
+# environment at `pypi`. No API tokens needed.
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release (e.g. 1.19.0). Required for manual runs."
+        required: true
+        type: string
+
+# Least-privilege default for every job; the publish job overrides with the
+# id-token: write it needs for PyPI Trusted Publishing.
+permissions:
+  contents: read
+
+jobs:
+  resolve-version:
+    name: Resolve release version
+    runs-on: ubuntu-latest
+    outputs:
+      value: ${{ steps.version.outputs.value }}
+    steps:
+      - name: Compute the release version from the tag (or the dispatch input)
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          else
+            VERSION="${{ inputs.version }}"
+          fi
+          if [ -z "${VERSION}" ]; then
+            echo "::error::no release version could be resolved from ${GITHUB_REF} or the dispatch input"
+            exit 1
+          fi
+          echo "releasing ${VERSION}"
+          echo "value=${VERSION}" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build dhis2w-security
+    needs: resolve-version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Install Python 3.13
+        run: uv python install 3.13
+
+      - name: Refuse a build whose version is not the release version
+        # The wheel carries whatever pyproject.toml says, so a tag naming a
+        # different version would upload the checked-out one under a release
+        # nobody bumped to. Compare the two before building.
+        env:
+          RELEASE_VERSION: ${{ needs.resolve-version.outputs.value }}
+        run: |
+          FILE_VERSION="$(uv run --no-project python -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")"
+          if [ "${FILE_VERSION}" != "${RELEASE_VERSION}" ]; then
+            echo "::error::pyproject.toml says ${FILE_VERSION}, the release names ${RELEASE_VERSION} — bump the package or retag"
+            exit 1
+          fi
+          echo "pyproject.toml version ${FILE_VERSION} matches the release version"
+
+      - name: Build wheel + sdist
+        run: uv build
+
+      - name: Refuse a wheel without the report and explorer assets
+        # The HTML report and the sharing explorer are rendered from files that
+        # ship inside the wheel. A wheel missing them installs cleanly and then
+        # fails at render time, so the guard belongs here.
+        run: |
+          python3 - <<'PY'
+          import glob, sys, zipfile
+
+          wheel = glob.glob("dist/dhis2w_security-*.whl")[0]
+          names = set(zipfile.ZipFile(wheel).namelist())
+          required = {
+              "dhis2w_security/core/report/assets/report.dc.html",
+              "dhis2w_security/core/report/assets/support.js",
+              "dhis2w_security/core/sharing/assets/sharing-explorer.html",
+              "dhis2w_security/core/sharing/assets/sharing-runtime.js",
+              "dhis2w_security/core/sharing/assets/d3.min.js",
+          }
+          missing = sorted(required - names)
+          if missing:
+              sys.exit(f"{wheel} is missing packaged assets: {missing}")
+          print(f"{wheel}: report and explorer assets present")
+          PY
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: dist-dhis2w-security
+          path: dist/
+
+  publish:
+    name: Publish to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/dhis2w-security
+    permissions:
+      # Trusted Publishing — PyPI verifies the OIDC token and accepts the
+      # upload without an API key. The project on PyPI must be configured
+      # with this workflow + environment.
+      id-token: write
+    steps:
+      - name: Download the dist artifact
+        uses: actions/download-artifact@v8
+        with:
+          path: dist
+          pattern: dist-*
+          merge-multiple: true
+
+      - name: List built artifacts
+        run: ls -lah dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
+          # Idempotent re-runs: skip anything already on PyPI so a partial
+          # publish can be re-driven without erroring.
+          skip-existing: true
+          # No `password` — trusted publishing handles auth via the OIDC
+          # token minted by the `id-token: write` permission above.
+
+  verify:
+    name: Verify from PyPI
+    needs: [resolve-version, publish]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Install Python 3.13
+        run: uv python install 3.13
+
+      - name: Wait for the release on the PyPI simple index
+        # uv resolves against PyPI's simple index, which lags the per-project
+        # JSON endpoint by several seconds. Poll what uv actually reads.
+        #
+        # PEP 625 normalizes distribution filenames — hyphens in the project
+        # name become underscores (`dhis2w-security` -> `dhis2w_security-...`).
+        run: |
+          VERSION="${{ needs.resolve-version.outputs.value }}"
+          for i in $(seq 1 36); do
+            if curl -fsSL "https://pypi.org/simple/dhis2w-security/" \
+              | grep -qE "dhis2w_security-${VERSION}(\.tar\.gz|-[^ \"<>]*\.whl)"; then
+              echo "dhis2w-security ${VERSION} on simple index (attempt ${i})"
+              break
+            fi
+            if [ "${i}" = "36" ]; then
+              echo "::error::dhis2w-security ${VERSION} did not appear on the PyPI simple index within 180s"
+              exit 1
+            fi
+            echo "attempt ${i}/36: not yet on simple index, sleeping 5s"
+            sleep 5
+          done
+
+      - name: Smoke-test the published wheel
+        # Install into a throwaway venv (uv's --no-project keeps it isolated
+        # from the runner) and check that the pack imports and that `d2w`
+        # mounts its command group. The install retries: the simple index the
+        # wait step polls lags the resolver-visible index by a few seconds.
+        run: |
+          VERSION="${{ needs.resolve-version.outputs.value }}"
+          uv venv .verify --python 3.13
+          for i in $(seq 1 12); do
+            if VIRTUAL_ENV=.verify uv pip install --refresh "dhis2w-security==${VERSION}" dhis2w-cli; then
+              break
+            fi
+            if [ "${i}" = "12" ]; then
+              echo "::error::dhis2w-security ${VERSION} did not resolve within 120s"
+              exit 1
+            fi
+            echo "attempt ${i}/12: resolver has not caught up, sleeping 10s"
+            sleep 10
+          done
+          .verify/bin/python -c "from dhis2w_security.plugin import plugin; print(plugin.contribute('v43'))"
+          .verify/bin/d2w --help | grep security
