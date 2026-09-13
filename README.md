@@ -14,7 +14,7 @@ login attempt (see [Default-credential probe](#default-credential-probe)).
 Alongside a global `d2w` install:
 
 ```bash
-uv tool install dhis2w-cli --with dhis2w-security
+uv tool install 'dhis2w-cli[security]'
 ```
 
 Inside a project that already has `dhis2w-cli`:
