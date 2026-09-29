@@ -54,3 +54,13 @@ Run every invocation with `BROWSER=true`.
 ## Before a PR
 
 `make lint && make test` must pass.
+
+## Releases
+
+This pack releases the same version as the dhis2w host, the way every repository of the
+ecosystem does (host `docs/decisions.md`, 2026-09-29). The host is released first; then this
+pack pins `dhis2w-core`, `dhis2w-client` and, in the dev group, `dhis2w-core[testing]` and
+`dhis2w-cli` to exactly that version, relocks (`uv lock --upgrade`, with `--refresh` when the
+PyPI index lags behind the host's publish), passes `make lint` and `make test`, and is tagged
+`vX.Y.Z` - the tag is what publishes to PyPI. A pack released before the host cannot resolve
+it.
