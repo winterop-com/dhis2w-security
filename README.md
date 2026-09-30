@@ -234,8 +234,8 @@ hold a secret value, so no password can reach a rendered report.
 
 ## Version trees
 
-The pack mirrors the host's three plugin trees. `dhis2w_security.v41`,
-`dhis2w_security.v42`, and `dhis2w_security.v43` each carry the thin per-version shim
+The pack mirrors the host's plugin trees. `dhis2w_security.v41`, `dhis2w_security.v42`,
+`dhis2w_security.v43`, and `dhis2w_security.v44` each carry the thin per-version shim
 (`cli.py`, `mcp.py`, `service.py`, `models.py`, and the `_wire.py` holding that major's
 wire divergences); v43 is the canonical baseline. Everything version-invariant — the
 authority taxonomy, the severity model, the guardrail contract, the audit orchestration,

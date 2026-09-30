@@ -16,7 +16,7 @@ from dhis2w_security.core import (
     evaluate_roles,
 )
 
-TREES = ("v41", "v42", "v43")
+TREES = ("v41", "v42", "v43", "v44")
 
 
 def _audit_module(tree: str) -> ModuleType:

@@ -37,7 +37,7 @@ from dhis2w_security.core import (
 from dhis2w_security.v43.models import SecuritySettings
 
 BASE = "https://mock.example"
-TREES = ("v41", "v42", "v43")
+TREES = ("v41", "v42", "v43", "v44")
 
 
 @pytest.fixture(autouse=True)

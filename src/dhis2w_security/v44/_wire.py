@@ -1,19 +1,19 @@
-"""Version-specific wire extraction for the v42 security plugin (2FA + last login + route auth + tokens).
+"""Version-specific wire extraction for the v44 security plugin (2FA + last login + route auth + tokens).
 
-v42 removed every admin-readable per-user 2FA field from the User resource
+v44 removed every admin-readable per-user 2FA field from the User resource
 (BUGS.md #58); 2FA enrolment is read via the superuser-only
 `/api/users/twoFactor` audit endpoints instead, so it is not requested here.
 
-The generated v42 `ApiToken` carries `type` as the `ApiTokenType` enum and `createdBy` as a `UserDto`
+The generated v44 `ApiToken` carries `type` as the `ApiTokenType` enum and `createdBy` as a `UserDto`
 (v41 differs on both); `tokens_from_raw` normalises `type` to a plain str and reads only the owner id, so
 `dhis2w_security.core.tokens` stays version-neutral and never imports `ApiTokenType`.
 
-The OAuth2 client wire shape diverges from v41 (BUGS.md #52, cross-referencing #39): v42/v43 have only the
+The OAuth2 client wire shape diverges from v41 (BUGS.md #52, cross-referencing #39): v42+ have only the
 comma-string `Dhis2OAuth2Client` with the `clientId` identifier, while v41 has only the array-typed
 `OAuth2Client` with `cid`. The list envelope key is `oAuth2Clients` on every major, and there is no
-version-invariant generated schema. `oauth2_clients` validates each `oAuth2Clients[]` record through the v42
+version-invariant generated schema. `oauth2_clients` validates each `oAuth2Clients[]` record through the v44
 `Dhis2OAuth2Client`, splits the comma-string grant types and redirect URIs into lists, normalises grant types
-to lowercase, and projects into the version-invariant `OAuth2ClientView`; v42 deliberately never imports
+to lowercase, and projects into the version-invariant `OAuth2ClientView`; v44 deliberately never imports
 `OAuth2Client`. The secret `clientSecret` field is never read, so no secret reaches a finding.
 """
 
@@ -21,8 +21,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from dhis2w_client.generated.v42.oas import ApiToken, Dhis2OAuth2Client
-from dhis2w_client.v42.auth_schemes import (
+from dhis2w_client.generated.v44.oas import ApiToken, Dhis2OAuth2Client
+from dhis2w_client.v44.auth_schemes import (
     ApiHeadersAuthScheme,
     ApiQueryParamsAuthScheme,
     ApiTokenAuthScheme,
@@ -38,7 +38,7 @@ from dhis2w_security.core.text import split_delimited
 USER_FIELDS = "id,username,disabled,email,lastLogin,passwordLastUpdated,userRoles[id]"
 TWO_FACTOR_SOURCE: TwoFactorSource = TwoFactorSource.AUDIT_ENDPOINT
 
-# OAuth2 client fields the auth-methods check reads on v42: the `clientId` identifier, display name, and the
+# OAuth2 client fields the auth-methods check reads on v44: the `clientId` identifier, display name, and the
 # comma-string grant types and redirect URIs. The secret is never requested, so it never reaches a finding.
 OAUTH2_CLIENT_FIELDS = "clientId,displayName,authorizationGrantTypes,redirectUris"
 
@@ -53,7 +53,7 @@ OAUTH2_CLIENT_FIELDS = "clientId,displayName,authorizationGrantTypes,redirectUri
 # `test_security_hygiene.py` (test_password_last_updated_v42_v43_*) pins the strict-or-None behaviour
 # across every tree, so these three stay on `dict[str, Any]`.
 def two_factor_enabled(user: dict[str, Any]) -> bool | None:
-    """v42 does not expose per-user 2FA on /api/users; the audit endpoint supplies it instead."""
+    """v44 does not expose per-user 2FA on /api/users; the audit endpoint supplies it instead."""
     return None
 
 
@@ -64,13 +64,13 @@ def last_login(user: dict[str, Any]) -> str | None:
 
 
 def password_last_updated(user: dict[str, Any]) -> str | None:
-    """Read v42's flattened top-level passwordLastUpdated timestamp from the /api/users record."""
+    """Read v44's flattened top-level passwordLastUpdated timestamp from the /api/users record."""
     value = user.get("passwordLastUpdated")
     return value if isinstance(value, str) else None
 
 
 def route_auth(route: Any) -> tuple[str | None, str | None]:
-    """Extract (auth_type, non-secret identity) from a v42 Route's discriminated 5-variant auth union.
+    """Extract (auth_type, non-secret identity) from a v44 Route's discriminated 5-variant auth union.
 
     The identity is the non-secret field of each scheme (username / clientId / tokenUri); the secret
     is WRITE_ONLY upstream and never serialized, so it is never read here. A route with auth present but
@@ -103,9 +103,9 @@ def route_auth(route: Any) -> tuple[str | None, str | None]:
 
 
 def tokens_from_raw(raw: list[Any]) -> list[TokenView]:
-    """Validate each raw /api/apiToken record into the v42 generated ApiToken and project a TokenView.
+    """Validate each raw /api/apiToken record into the v44 generated ApiToken and project a TokenView.
 
-    The generated v42 `ApiToken.type` is the `ApiTokenType` enum; it is normalised to a plain str here so
+    The generated v44 `ApiToken.type` is the `ApiTokenType` enum; it is normalised to a plain str here so
     `dhis2w_security.core.tokens` stays version-neutral. `createdBy` is a `UserDto`, so the owner id is read off
     `createdBy.id`. The secret `key` is `@JsonIgnore` upstream and absent from the wire, so it is never read
     or carried. A record that fails validation is skipped rather than aborting the whole inventory.
@@ -157,9 +157,9 @@ def _token_allowlists(token: ApiToken) -> TokenAllowlists:
 
 
 def oauth2_clients(raw: dict[str, Any]) -> list[OAuth2ClientView]:
-    """Project each v42 `/api/oAuth2Clients` record from the `oAuth2Clients` envelope into an OAuth2ClientView.
+    """Project each v44 `/api/oAuth2Clients` record from the `oAuth2Clients` envelope into an OAuth2ClientView.
 
-    v42 returns the clients under the `oAuth2Clients` key, each with the `clientId` identifier and the
+    v44 returns the clients under the `oAuth2Clients` key, each with the `clientId` identifier and the
     comma-string `authorizationGrantTypes` / `redirectUris`. The comma-strings are split into lists and grant
     types normalised to lowercase so the version-invariant reducer compares against the canonical OAuth2 grant
     tokens. The secret `clientSecret` field is never read, so no secret is ever carried. A record that fails
@@ -188,10 +188,10 @@ def oauth2_clients(raw: dict[str, Any]) -> list[OAuth2ClientView]:
 
 
 def _grant_types(client: Dhis2OAuth2Client) -> frozenset[str]:
-    """Split the v42 comma-string `authorizationGrantTypes` into a lowercase frozenset."""
+    """Split the v44 comma-string `authorizationGrantTypes` into a lowercase frozenset."""
     return frozenset(split_delimited(client.authorizationGrantTypes, lower=True))
 
 
 def _redirect_uris(client: Dhis2OAuth2Client) -> tuple[str, ...]:
-    """Split the v42 comma-string `redirectUris` into a tuple, preserving case."""
+    """Split the v44 comma-string `redirectUris` into a tuple, preserving case."""
     return tuple(split_delimited(client.redirectUris, lower=False))

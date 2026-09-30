@@ -51,7 +51,7 @@ OAUTH2_CLIENT_FIELDS = "clientId,displayName,authorizationGrantTypes,redirectUri
 # coerces to `True`. That would defeat the deliberate `isinstance(value, str | bool)` guards below,
 # which treat any non-conforming wire value as absent rather than trust a type-coerced guess.
 # `test_security_hygiene.py` (test_password_last_updated_v42_v43_*) pins the strict-or-None behaviour
-# across all three trees, so these three stay on `dict[str, Any]`.
+# across every tree, so these three stay on `dict[str, Any]`.
 def two_factor_enabled(user: dict[str, Any]) -> bool | None:
     """v43 does not expose per-user 2FA on /api/users; the audit endpoint supplies it instead."""
     return None

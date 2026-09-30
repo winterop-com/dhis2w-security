@@ -4,7 +4,7 @@
 API-only INFO when the posture is unparsed, the system-disabled / both-sinks-off / narrow-scope MEDIUMs,
 and a healthy posture that yields no MEDIUM. The `_run_audit_config` wiring (no dhis.conf -> the API-only
 INFO; a parsed tmp file -> the parsed verdicts; an unreadable path -> a degraded note) is exercised across
-all three version trees.
+every version tree.
 
 DHIS2 matrix semantics (from `AuditMatrixConfigurer.java`):
 - Absent or empty matrix key: DEFAULT_AUDIT_CONFIGURATION = {CREATE, UPDATE, DELETE, SECURITY} applied.
@@ -30,7 +30,7 @@ from dhis2w_security.core import (
     evaluate_audit_config,
 )
 
-TREES = ("v41", "v42", "v43")
+TREES = ("v41", "v42", "v43", "v44")
 
 
 def _titles(findings: list[Any]) -> set[str]:

@@ -26,7 +26,7 @@ from dhis2w_security.core import (
 )
 
 BASE = "https://mock.example"
-TREES = ("v41", "v42", "v43")
+TREES = ("v41", "v42", "v43", "v44")
 
 
 def _titles(findings: list[Any]) -> set[str]:

@@ -46,7 +46,12 @@ from dhis2w_security.core.guardrails import ALLOWED_AUDIT_PATHS
 
 BASE = "https://dhis2.example"
 
-TREES: tuple[tuple[str, str], ...] = (("v41", "2.41.8.1"), ("v42", "2.42.0"), ("v43", "2.43.0"))
+TREES: tuple[tuple[str, str], ...] = (
+    ("v41", "2.41.8.1"),
+    ("v42", "2.42.0"),
+    ("v43", "2.43.0"),
+    ("v44", "2.44.0"),
+)
 
 # The full set of endpoints a complete audit run touches (minus the version check's external release
 # feed). Enumerated from a real run so a future check that reaches a new endpoint fails assert_all_mocked.

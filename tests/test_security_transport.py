@@ -2,7 +2,7 @@
 
 `evaluate_transport` is version-invariant and tested directly with hand-built `TransportHeaders`. The
 `_run_transport` wiring (which reads the scheme from `client.base_url` and the headers off one
-`get_response("/api/system/info")`) is exercised against a mock client across all three version trees.
+`get_response("/api/system/info")`) is exercised against a mock client across every version tree.
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ from dhis2w_security.core import (
     evaluate_transport,
 )
 
-TREES = ("v41", "v42", "v43")
+TREES = ("v41", "v42", "v43", "v44")
 
 # A fully hardened HTTPS posture: a 1-year-plus HSTS, CSP with frame-ancestors, nosniff, the three
 # cross-origin isolation headers, and a genericised server.

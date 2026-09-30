@@ -134,9 +134,10 @@ async def test_security_authorities_returns_categorised_account(
 
 # Per-tree versions below that line's advisory patch floor (v41 floor 8.2, v42 5.1, v43 0.1). The client
 # only connects to a server on its own major line, so the below-floor case is tested per tree on its line.
+# The 2.44 line is unreleased and has no advisory floor, so v44 has no entry here.
 _BELOW_FLOOR_VERSION = {"v41": "2.41.5.0", "v42": "2.42.4.0", "v43": "2.43.0.0"}
 # Per-tree versions above that line's floor and on a supported line -> no findings with feed=None.
-_CLEAN_VERSION = {"v41": "2.41.9", "v42": "2.42.6", "v43": "2.43.1"}
+_CLEAN_VERSION = {"v41": "2.41.9", "v42": "2.42.6", "v43": "2.43.1", "v44": "2.44.0"}
 
 
 @respx.mock
@@ -147,6 +148,8 @@ async def test_security_version_flags_below_advisory_floor(core_version: str, co
     feed_route = respx.get(url__startswith=releases.RELEASES_FEED_URL).mock(
         return_value=httpx.Response(200, json={"versions": []})
     )
+    if core_version not in _BELOW_FLOOR_VERSION:
+        pytest.skip(f"the {core_version} line has no advisory patch floor")
     version = _BELOW_FLOOR_VERSION[core_version]
     respx.get(f"{_HOST}/api/system/info").mock(return_value=httpx.Response(200, json={"version": version}))
     async with Client(_server_for(core_version)) as client:

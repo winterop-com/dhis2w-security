@@ -2,7 +2,7 @@
 
 `evaluate_apps` is version-invariant and tested directly; the `_run_apps` wiring (which maps the
 client's typed App / AppHubApp accessors into the version-invariant models) is exercised against a
-mock client across all three version trees.
+mock client across every version tree.
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ from dhis2w_security.core import (
     evaluate_apps,
 )
 
-TREES = ("v41", "v42", "v43")
+TREES = ("v41", "v42", "v43", "v44")
 
 
 def _titles(findings: list[Any]) -> set[str]:

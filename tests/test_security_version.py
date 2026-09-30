@@ -23,7 +23,7 @@ from dhis2w_security.core import (
 )
 from dhis2w_security.core.releases import RELEASES_FEED_URL, fetch_release_feed
 
-TREES = ("v41", "v42", "v43")
+TREES = ("v41", "v42", "v43", "v44")
 
 
 @pytest.fixture(autouse=True)

@@ -1,6 +1,6 @@
 """Verify `d2w security authorities` categorises /api/me/authorization output.
 
-Parametrised over the three version trees: `DHIS2_VERSION` selects the
+Parametrised over every version tree: `DHIS2_VERSION` selects the
 plugin tree the pack's app mounts, and the matching tree's `open_client`
 is patched, so each tree's CLI path is exercised end-to-end in-process.
 """
@@ -18,7 +18,7 @@ from typer.testing import CliRunner
 
 _AUTHORITIES = ["F_USER_ADD", "F_SQLVIEW_PUBLIC_ADD", "F_DATAVALUE_ADD"]
 
-TREES = ("v41", "v42", "v43")
+TREES = ("v41", "v42", "v43", "v44")
 
 
 @pytest.fixture(autouse=True)

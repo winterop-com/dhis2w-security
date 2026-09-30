@@ -28,7 +28,7 @@ from dhis2w_security.core import (
 )
 
 NOW = datetime(2026, 6, 18)
-TREES = ("v41", "v42", "v43")
+TREES = ("v41", "v42", "v43", "v44")
 
 
 def _audit_module(tree: str) -> ModuleType:
@@ -586,7 +586,7 @@ async def test_run_hygiene_v41_flags_superuser_without_2fa() -> None:
     assert any(f.title == "Superuser without 2FA" and f.severity is Severity.CRITICAL for f in result.findings)
 
 
-@pytest.mark.parametrize("tree", ("v42", "v43"))
+@pytest.mark.parametrize("tree", ("v42", "v43", "v44"))
 async def test_run_hygiene_endpoint_reports_privileged_missing_count(tree: str) -> None:
     """v42/v43 read the 2FA summary endpoint and surface the privileged-missing count."""
     audit = _audit_module(tree)
@@ -613,7 +613,7 @@ async def test_run_hygiene_endpoint_reports_privileged_missing_count(tree: str) 
     assert any(f.title == "Superusers without 2FA" for f in result.findings)
 
 
-@pytest.mark.parametrize("tree", ("v42", "v43"))
+@pytest.mark.parametrize("tree", ("v42", "v43", "v44"))
 async def test_run_hygiene_endpoint_degrades_when_not_backported(tree: str) -> None:
     """A 404/403 from the 2FA endpoint degrades to a note, not a false all-clear."""
     audit = _audit_module(tree)
@@ -657,7 +657,7 @@ def test_password_last_updated_v41_reads_nested_user_credentials() -> None:
     assert wire.password_last_updated({"userCredentials": {"passwordLastUpdated": 123}}) is None
 
 
-@pytest.mark.parametrize("tree", ("v42", "v43"))
+@pytest.mark.parametrize("tree", ("v42", "v43", "v44"))
 def test_password_last_updated_v42_v43_reads_flat_field(tree: str) -> None:
     """v42/v43 read the flattened top-level passwordLastUpdated field."""
     wire = _wire_module(tree)
@@ -673,7 +673,7 @@ def test_user_fields_v41_requests_nested_password_selector() -> None:
     assert "userCredentials[twoFA,passwordLastUpdated]" in _wire_module("v41").USER_FIELDS
 
 
-@pytest.mark.parametrize("tree", ("v42", "v43"))
+@pytest.mark.parametrize("tree", ("v42", "v43", "v44"))
 def test_user_fields_v42_v43_request_flat_password_selector(tree: str) -> None:
     """v42/v43 USER_FIELDS request the flat passwordLastUpdated field, not a nested selector."""
     fields = _wire_module(tree).USER_FIELDS
@@ -706,7 +706,7 @@ async def test_run_hygiene_v41_builds_password_from_nested_credentials() -> None
     assert any(f.title == "Accounts with stale or unset passwords" for f in result.findings)
 
 
-@pytest.mark.parametrize("tree", ("v42", "v43"))
+@pytest.mark.parametrize("tree", ("v42", "v43", "v44"))
 async def test_run_hygiene_v42_v43_builds_password_from_flat_field(tree: str) -> None:
     """v42/v43 wiring: a flat passwordLastUpdated feeds the stale-password aggregate."""
     audit = _audit_module(tree)
