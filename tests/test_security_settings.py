@@ -2,8 +2,8 @@
 
 `evaluate_settings` is version-invariant and tested directly through a typed test double that
 satisfies `SettingsLike`; the `_run_settings` wiring (which reads `/api/systemSettings` plus the
-separate `/api/configuration/corsWhitelist` array) is exercised against a mock client on all three
-version trees.
+separate `/api/configuration/corsWhitelist` array) is exercised against a mock client on every
+version tree.
 """
 
 from __future__ import annotations
@@ -25,7 +25,7 @@ from dhis2w_security.core import (
     evaluate_settings,
 )
 
-TREES = ("v41", "v42", "v43")
+TREES = ("v41", "v42", "v43", "v44")
 
 
 class _Settings(BaseModel):

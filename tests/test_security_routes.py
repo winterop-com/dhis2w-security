@@ -3,7 +3,7 @@
 `evaluate_routes` is version-invariant and tested directly with hand-built `RouteTarget` inputs. The
 `_run_routes` wiring (which reads `/api/routes` via `get_raw`, wraps the payload into typed `oas.Route`,
 and extracts the non-secret auth via the per-tree `_wire` extractor) is exercised against a mock client
-across all three version trees, covering the v41 undiscriminated vs v42/v43 discriminated auth union and
+across every version tree, covering the v41 undiscriminated vs v42/v43 discriminated auth union and
 asserting no secret ever surfaces in a RouteTarget or finding.
 """
 
@@ -25,7 +25,7 @@ from dhis2w_security.core import (
     evaluate_routes,
 )
 
-TREES = ("v41", "v42", "v43")
+TREES = ("v41", "v42", "v43", "v44")
 
 # A public-destination route with no auth and a required authority: only the inventory finding fires.
 _PUBLIC = RouteTarget(
@@ -257,7 +257,7 @@ async def test_run_routes_api_token_carries_no_secret(tree: str) -> None:
     assert "tok-do-not-leak" not in repr(result.findings)
 
 
-@pytest.mark.parametrize("tree", ("v42", "v43"))
+@pytest.mark.parametrize("tree", ("v42", "v43", "v44"))
 async def test_run_routes_oauth2_identity_on_v42_v43(tree: str) -> None:
     """v42/v43 carry the 5th oauth2-client-credentials variant: identity is clientId, never clientSecret."""
     envelope = {
@@ -440,7 +440,7 @@ async def test_run_routes_no_type_auth_reports_unknown_not_crash(tree: str) -> N
     assert "s3cr3t" not in repr(result.findings)
 
 
-@pytest.mark.parametrize("tree", ("v42", "v43"))
+@pytest.mark.parametrize("tree", ("v42", "v43", "v44"))
 async def test_run_routes_unknown_future_auth_type_reports_unknown(tree: str) -> None:
     """An auth block with an unrecognized future `type` is reported as unknown, check stays OK."""
     envelope = {

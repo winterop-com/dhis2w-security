@@ -4,7 +4,7 @@
 expired-but-not-deleted path is exercised with a fixed `now_epoch_millis` so it stays deterministic. The
 `_run_tokens` wiring (which reads `/api/me/authorization` for the ALL flag, lists `/api/apiToken` via
 `get_raw`, wraps the payload through the per-tree `_wire.tokens_from_raw` extractor, and reduces it) is
-exercised against a mock client across all three version trees, covering the v41 `Literal`-type vs
+exercised against a mock client across every version tree, covering the v41 `Literal`-type vs
 v42/v43 enum-type normalization, the polymorphic attributes flattening, and asserting that no token secret
 (`key`) ever surfaces in a TokenView or finding.
 """
@@ -29,7 +29,7 @@ from dhis2w_security.core import (
     evaluate_tokens,
 )
 
-TREES = ("v41", "v42", "v43")
+TREES = ("v41", "v42", "v43", "v44")
 
 # A fixed reference clock so the expired-but-not-deleted detection is deterministic: 2026-06-24T00:00:00Z.
 _NOW_EPOCH_MILLIS = 1782259200000

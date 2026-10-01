@@ -21,14 +21,14 @@ mypy + pyright, full descriptive names, one-line Google-style docstrings on ever
 module, class, and function, conventional commits, no AI attribution, and the
 greenfield voice: describe what the code does now, never how it got there.
 
-## The three version trees
+## The version trees
 
-`dhis2w_security.v41`, `.v42`, and `.v43` mirror the host's plugin trees. v43 is the
-canonical baseline: new behaviour is written there first and copied to the two
+`dhis2w_security.v41`, `.v42`, `.v43`, and `.v44` mirror the host's plugin trees. v43 is
+the canonical baseline: new behaviour is written there first and copied to the
 siblings, which differ only by import path until a wire shape genuinely diverges.
-Every behaviour-changing edit lands in all three trees; a new file lands in three
-locations, a deletion in three. The tests are one tree parametrised over the three,
-never three copies.
+Every behaviour-changing edit lands in every tree; a new file lands in every tree,
+a deletion in every tree. The tests are one tree parametrised over all of them,
+never per-tree copies.
 
 Version-invariant logic — the taxonomy, the severity model, the guardrails, the
 orchestration, and the rendering — lives once in `dhis2w_security.core`.

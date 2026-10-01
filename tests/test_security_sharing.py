@@ -3,7 +3,7 @@
 `AccessBits`, `build_sharing_graph`, `evaluate_sharing`, and `resolve_focus_types` are
 version-invariant and tested directly. The `_run_sharing` wiring (which pages the sharing endpoints,
 maps the raw payloads into the version-neutral records, builds the graph once, and reduces it to
-findings) is exercised against a mock client across all three version trees.
+findings) is exercised against a mock client across every version tree.
 """
 
 from __future__ import annotations
@@ -35,7 +35,7 @@ from dhis2w_security.core import (
 )
 from dhis2w_security.core.sharing import AccessBits, PrincipalKind, SchemaShareability, resolve_focus_types
 
-TREES = ("v41", "v42", "v43")
+TREES = ("v41", "v42", "v43", "v44")
 
 
 def _titles(findings: list[Any]) -> set[str]:

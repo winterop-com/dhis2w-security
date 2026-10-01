@@ -6,7 +6,7 @@ MEDIUM fires), broad-grant detection (including the device-code URN), and loose-
 plus non-loopback cleartext http://, with loopback http://localhost / 127.0.0.1 not flagged per RFC 8252).
 The `_run_auth_methods` wiring (reading `/api/loginConfig` and `/api/oAuth2Clients` via `get_raw`, wrapping
 through the per-tree `_wire.oauth2_clients` extractor, and reducing) is exercised against a mock client across
-all three version trees: the v41 `cid` / array-typed fields vs the v42/v43 `clientId` / comma-string fields
+every version tree: the v41 `cid` / array-typed fields vs the v42/v43 `clientId` / comma-string fields
 under the `oAuth2Clients` list envelope every major returns, the oAuth2Clients-403 degrade-with-note that
 keeps the OIDC findings, and the assertion that no client secret ever surfaces in any view or finding.
 A respx-backed test drives a real `Dhis2Client` against the verbatim `{"pager": ..., "oAuth2Clients": [...]}`
@@ -36,7 +36,7 @@ from dhis2w_security.core import (
     evaluate_auth_methods,
 )
 
-TREES = ("v41", "v42", "v43")
+TREES = ("v41", "v42", "v43", "v44")
 _BASE = "https://dhis2.example"
 
 
@@ -239,7 +239,7 @@ def _mock_client(*, login: dict[str, Any], clients: dict[str, Any] | Exception) 
 
 @pytest.mark.parametrize("tree", TREES)
 async def test_run_auth_methods_flags_oidc_provider(tree: str) -> None:
-    """A configured OIDC provider on /api/loginConfig flags the INFO across all three trees."""
+    """A configured OIDC provider on /api/loginConfig flags the INFO across every tree."""
     client = _mock_client(
         login=_login_payload([{"id": "google", "loginText": "Sign in with Google"}]),
         clients=_clients_payload([]),
@@ -509,8 +509,9 @@ async def test_wire_oauth2_clients_skips_invalid_record(tree: str) -> None:
 
 # The verbatim 200 body `GET /api/oAuth2Clients` serves, per major. v41 carries the array-typed
 # `OAuth2Client` keyed by `cid`; v42/v43 carry the comma-string `Dhis2OAuth2Client` keyed by `clientId`.
-# The list envelope is `oAuth2Clients` on all three — reading `data` there yields an empty inventory
-# however many clients the instance holds.
+# The list envelope is `oAuth2Clients` on every major — reading `data` there yields an empty inventory
+# however many clients the instance holds. The v44 body mirrors the v43 shape until it is captured
+# from a 2.44 development build.
 _LIVE_CLIENT_ENVELOPE: dict[str, dict[str, Any]] = {
     "v41": {
         "pager": {"page": 1, "pageSize": 50, "total": 1, "pageCount": 1},
@@ -542,6 +543,18 @@ _LIVE_CLIENT_ENVELOPE: dict[str, dict[str, Any]] = {
             {
                 "clientId": "live-v43-app",
                 "displayName": "Live v43 app",
+                "authorizationGrantTypes": "authorization_code,refresh_token",
+                "redirectUris": "https://app.example/callback",
+                "id": "MJrvnRbtnoX",
+            }
+        ],
+    },
+    "v44": {
+        "pager": {"page": 1, "pageSize": 50, "total": 1, "pageCount": 1},
+        "oAuth2Clients": [
+            {
+                "clientId": "live-v44-app",
+                "displayName": "Live v44 app",
                 "authorizationGrantTypes": "authorization_code,refresh_token",
                 "redirectUris": "https://app.example/callback",
                 "id": "MJrvnRbtnoX",

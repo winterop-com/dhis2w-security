@@ -5,7 +5,7 @@ hardcodes authority names. A name the running DHIS2 version does not define
 can never be granted by current-version role editing and most likely gates
 nothing -- matching on it gives false confidence. This test pins every
 taxonomy string to the live `/api/authorities` inventory on the play
-instances for v41, v42 and v43, minus the strings a major is known not to
+instances for v41, v42, v43 and v44, minus the strings a major is known not to
 define (`ABSENT_BY_VERSION`), each of which carries the live evidence.
 
 Whether `/api/authorities` answers at all is a property of the
@@ -30,6 +30,7 @@ PLAY_URLS = {
     "v41": "https://play.im.dhis2.org/dev-2-41",
     "v42": "https://play.im.dhis2.org/dev-2-42",
     "v43": "https://play.im.dhis2.org/dev-2-43",
+    "v44": "https://play.im.dhis2.org/dev",
 }
 
 TAXONOMY_STRINGS: frozenset[str] = frozenset().union(*(category.authorities for category in AUTHORITY_CATEGORIES))

@@ -2,7 +2,7 @@
 
 These tests enforce the responsible-use contract documented in
 `dhis2w_security.core.guardrails` against every public service function
-in all three version trees. A new security check inherits enforcement by
+in every version tree. A new security check inherits enforcement by
 being added to `SERVICE_CALLS`; the completeness test fails if a public
 service function ships without registering here.
 """
@@ -23,6 +23,7 @@ from dhis2w_security.core.guardrails import CONNECT_PATHS, GET_ALLOWLIST
 from dhis2w_security.v41 import service as service_v41
 from dhis2w_security.v42 import service as service_v42
 from dhis2w_security.v43 import service as service_v43
+from dhis2w_security.v44 import service as service_v44
 
 BASE = "https://dhis2.example"
 
@@ -31,6 +32,7 @@ TREES: tuple[tuple[str, ModuleType, str], ...] = (
     ("v41", service_v41, "2.41.3"),
     ("v42", service_v42, "2.42.4"),
     ("v43", service_v43, "2.43.1"),
+    ("v44", service_v44, "2.44.0"),
 )
 
 # Every public security service function, with a thunk that exercises it.
@@ -130,8 +132,9 @@ def test_retry_policy_default_never_retries_auth_failures() -> None:
     from dhis2w_client.v41 import RetryPolicy as RetryPolicyV41
     from dhis2w_client.v42 import RetryPolicy as RetryPolicyV42
     from dhis2w_client.v43 import RetryPolicy as RetryPolicyV43
+    from dhis2w_client.v44 import RetryPolicy as RetryPolicyV44
 
-    for retry_policy_class in (RetryPolicyV41, RetryPolicyV42, RetryPolicyV43):
+    for retry_policy_class in (RetryPolicyV41, RetryPolicyV42, RetryPolicyV43, RetryPolicyV44):
         policy = retry_policy_class()
         assert 401 not in policy.retry_statuses
         assert 403 not in policy.retry_statuses
@@ -143,7 +146,8 @@ def test_open_client_defaults_to_no_retry() -> None:
     from dhis2w_core.v41.client_context import open_client as open_client_v41
     from dhis2w_core.v42.client_context import open_client as open_client_v42
     from dhis2w_core.v43.client_context import open_client as open_client_v43
+    from dhis2w_core.v44.client_context import open_client as open_client_v44
 
-    for open_client in (open_client_v41, open_client_v42, open_client_v43):
+    for open_client in (open_client_v41, open_client_v42, open_client_v43, open_client_v44):
         default = inspect.signature(open_client).parameters["retry_policy"].default
         assert default is None

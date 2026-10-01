@@ -12,7 +12,7 @@ from dhis2w_core.plugin import ENTRY_POINT_GROUP, Contribution, load_plugin_host
 from dhis2w_security.plugin import plugin
 
 _PYPROJECT = Path(__file__).resolve().parent.parent / "pyproject.toml"
-TREES = ("v41", "v42", "v43")
+TREES = ("v41", "v42", "v43", "v44")
 
 
 def test_pyproject_declares_the_entry_point() -> None:

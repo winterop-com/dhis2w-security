@@ -5,7 +5,7 @@ from __future__ import annotations
 from dhis2w_core.plugin import Contribution, extension
 
 #: The plugin trees this pack ships, one per supported DHIS2 major.
-SUPPORTED_VERSION_KEYS: frozenset[str] = frozenset({"v41", "v42", "v43"})
+SUPPORTED_VERSION_KEYS: frozenset[str] = frozenset({"v41", "v42", "v43", "v44"})
 #: The tree an unrecognised version key binds to; v43 is the canonical baseline.
 DEFAULT_VERSION_KEY = "v43"
 

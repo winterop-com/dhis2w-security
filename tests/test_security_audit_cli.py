@@ -1,6 +1,6 @@
 """Verify `d2w security audit` end-to-end via the Typer CLI runner.
 
-Parametrised over the three version trees: `DHIS2_VERSION` selects the
+Parametrised over every version tree: `DHIS2_VERSION` selects the
 plugin tree the pack's app mounts, and the matching tree's `open_client`
 is patched, so each tree's CLI path is exercised end-to-end in-process.
 """
@@ -18,7 +18,7 @@ from typer.testing import CliRunner
 
 from dhis2w_security.v43.models import SecuritySettings
 
-TREES = ("v41", "v42", "v43")
+TREES = ("v41", "v42", "v43", "v44")
 
 # A SecuritySettings instance with minPasswordLength below the recommended 8
 # so the settings check is guaranteed to produce at least one finding.
@@ -168,7 +168,7 @@ def test_audit_json_output_has_summary_with_total_findings(runner: CliRunner, tm
 
 
 # ---------------------------------------------------------------------------
-# Test C: parametrised over all three version trees
+# Test C: parametrised over every version tree
 # ---------------------------------------------------------------------------
 
 
