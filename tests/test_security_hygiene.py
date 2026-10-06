@@ -635,7 +635,7 @@ async def test_run_hygiene_endpoint_degrades_when_not_backported(tree: str) -> N
 
 
 # ---------------------------------------------------------------------------
-# Per-tree passwordLastUpdated wire split (v41 nested vs v42/v43 flat; BUGS.md #56)
+# Per-tree passwordLastUpdated wire split (v41 nested vs v42/v43 flat; DHIS2_ISSUES.md #56)
 # ---------------------------------------------------------------------------
 
 

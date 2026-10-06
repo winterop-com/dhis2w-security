@@ -1,7 +1,7 @@
 """Version-specific wire extraction for the v41 security plugin (2FA + last login + route auth + tokens).
 
 v41's generated `oas.Route.auth` is an UNDISCRIMINATED 4-variant union with no `oauth2-client-credentials`
-member and no `type` discriminator (BUGS.md #14): the OAS gap upstream omits the Jackson `type` field, so
+member and no `type` discriminator (DHIS2_ISSUES.md #14): the OAS gap upstream omits the Jackson `type` field, so
 the codegen spec-patch synthesises a discriminated union only in the `auth_schemes` re-export. The route
 auth extractor below re-validates through that adapter, which correctly picks the variant by `type`, and
 references only the four schemes v41 carries; never the OAuth2 variant, which does not exist here.
@@ -11,7 +11,7 @@ The generated v41 `ApiToken` differs from v42/v43: `type` is a `Literal`, not th
 `tokens_from_raw` normalises `type` to a plain str and reads the owner id off `createdBy.id`, so
 `dhis2w_security.core.tokens` stays version-neutral; v41 deliberately never imports `ApiTokenType`.
 
-The OAuth2 client wire shape diverges too (BUGS.md #52, cross-referencing #39): v41 has only the
+The OAuth2 client wire shape diverges too (DHIS2_ISSUES.md #52, cross-referencing #39): v41 has only the
 array-typed `OAuth2Client` with the `cid` identifier, while v42/v43 have only the comma-string
 `Dhis2OAuth2Client` with `clientId`, and there is no version-invariant generated schema. The list
 envelope key is `oAuth2Clients` on every major. `oauth2_clients` validates each `oAuth2Clients[]`
@@ -37,7 +37,7 @@ from pydantic import ValidationError
 from dhis2w_security.core import OAuth2ClientView, TokenAllowlists, TokenView, TwoFactorSource
 
 # v41 still exposes per-user 2FA state on the User resource, so it is requested inline. v41 nests
-# passwordLastUpdated under userCredentials (flattened onto the User from v42; BUGS.md #56).
+# passwordLastUpdated under userCredentials (flattened onto the User from v42; DHIS2_ISSUES.md #56).
 USER_FIELDS = (
     "id,username,disabled,email,lastLogin,twoFactorEnabled,userCredentials[twoFA,passwordLastUpdated],userRoles[id]"
 )
@@ -58,7 +58,7 @@ OAUTH2_CLIENT_FIELDS = "cid,displayName,grantTypes,redirectUris"
 # `test_security_hygiene.py` (test_password_last_updated_v41_reads_nested_user_credentials, and the
 # v42/v43 counterpart) pins the strict-or-None behaviour across every tree, so these three stay
 # on `dict[str, Any]`; the nested `userCredentials` shape itself is a genuine, separate wire divergence
-# (BUGS.md #56), also not representable as a flat top-level read.
+# (DHIS2_ISSUES.md #56), also not representable as a flat top-level read.
 def two_factor_enabled(user: dict[str, Any]) -> bool | None:
     """Read v41's per-user 2FA flag from the /api/users record (falls back to userCredentials.twoFA)."""
     value = user.get("twoFactorEnabled")
@@ -77,7 +77,7 @@ def last_login(user: dict[str, Any]) -> str | None:
 
 
 def password_last_updated(user: dict[str, Any]) -> str | None:
-    """Read v41's nested userCredentials.passwordLastUpdated timestamp from the /api/users record (BUGS.md #56)."""
+    """Read v41's nested userCredentials.passwordLastUpdated from the /api/users record (DHIS2_ISSUES.md #56)."""
     credentials = user.get("userCredentials")
     if not isinstance(credentials, dict):
         return None
@@ -86,7 +86,7 @@ def password_last_updated(user: dict[str, Any]) -> str | None:
 
 
 def route_auth(route: Any) -> tuple[str | None, str | None]:
-    """Extract (auth_type, non-secret identity) from a v41 Route's 4-variant auth union (BUGS.md #14).
+    """Extract (auth_type, non-secret identity) from a v41 Route's 4-variant auth union (DHIS2_ISSUES.md #14).
 
     v41 has no `oauth2-client-credentials` scheme, so only the four variants v41 carries are matched. A
     route with auth present but an unrecognizable or missing `type` (including an oauth2 block on the wire

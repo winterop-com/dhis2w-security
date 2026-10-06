@@ -12,7 +12,7 @@ this against the play instances), with one exception the test names:
 `F_MOBILE_SETTINGS` is defined on v42 and v43 and not on v41, where the
 system-settings category matches on its other three strings. Whether that route answers is a property of
 the deployment rather than the major -- an instance that answers 500 skips the
-check instead of failing it (BUGS.md #45).
+check instead of failing it (DHIS2_ISSUES.md #45).
 
 Note on matching: `/api/me/authorization` reports *granted* strings, which
 on long-lived databases can include residual names from older DHIS2
@@ -24,7 +24,7 @@ Route authority name: DHIS2 derives the public-route authority from the
 ``Route`` schema descriptor as ``F_ROUTE_PUBLIC_ADD`` (verified in
 ``RouteSchemaDescriptor.java`` on v41, v42, and the 2.44 dev line). It exists
 across the whole v41-v43 window, so the taxonomy entry matches uniformly. See
-BUGS.md #57 for the naming divergence vs the auditor app's constant.
+DHIS2_ISSUES.md #57 for the naming divergence vs the auditor app's constant.
 
 References:
 - ``GET /api/authorities`` on a live DHIS2 instance lists every authority
