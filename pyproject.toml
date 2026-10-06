@@ -1,6 +1,6 @@
 [project]
 name = "dhis2w-security"
-version = "1.31.1"
+version = "1.32.0"
 description = "dhis2w plugin pack: the d2w security surface and the read-only security_* MCP tools."
 readme = "README.md"
 authors = [{ name = "Morten Hansen", email = "morten@winterop.com" }]
@@ -17,9 +17,9 @@ classifiers = [
 ]
 dependencies = [
   # The plugin host, the profile resolver, `open_client`, and the CLI output helpers.
-  "dhis2w-core==1.31.1",
+  "dhis2w-core==1.32.0",
   # `Dhis2Client`, the auth schemes, the error hierarchy, and the generated OAS models.
-  "dhis2w-client==1.31.1",
+  "dhis2w-client==1.32.0",
   # Every view model and every check result.
   "pydantic>=2.13",
   # The `d2w security` sub-app.
@@ -45,8 +45,8 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
-  "dhis2w-core[testing]==1.31.1",
-  "dhis2w-cli==1.31.1",
+  "dhis2w-core[testing]==1.32.0",
+  "dhis2w-cli==1.32.0",
   "ruff>=0.16.3",
   "mypy>=2.3.1",
   "pyright>=1.1.414",
