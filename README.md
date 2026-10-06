@@ -247,7 +247,7 @@ unrecognised version key.
 ## Upstream DHIS2 quirks
 
 The code cites these entries in the host repository's
-[BUGS.md](https://github.com/winterop-com/dhis2w/blob/main/BUGS.md), which carry the
+[DHIS2_ISSUES.md](https://github.com/winterop-com/dhis2w/blob/main/DHIS2_ISSUES.md), which carry the
 version observed, a `curl` repro, and the expected-versus-actual behaviour:
 
 - **#14** — the Route `auth` block: v41's undiscriminated four-variant union has no

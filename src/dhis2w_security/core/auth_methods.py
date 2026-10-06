@@ -12,7 +12,7 @@ vector and is flagged MEDIUM. The check is read-only: two GETs, never a login at
 `grantTypes` / `redirectUris`, `cid`) and the v42/v43 `Dhis2OAuth2Client` (comma-string
 `authorizationGrantTypes` / `redirectUris`, `clientId`); the list envelope key is `oAuth2Clients` on every
 major, and there is no
-version-invariant generated OAuth2-client schema (BUGS.md #52, cross-referencing #39). It deliberately omits
+version-invariant generated OAuth2-client schema (DHIS2_ISSUES.md #52, cross-referencing #39). It deliberately omits
 any secret field so a client secret can never reach a finding or evidence; the per-tree `_wire.oauth2_clients`
 extractor never reads `secret` / `clientSecret`.
 """

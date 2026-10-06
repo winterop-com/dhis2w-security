@@ -11,7 +11,7 @@ The DHIS2 default (absent or empty matrix key) gives every scope {CREATE, UPDATE
 freshly-deployed instance with NO audit.* config is already audited on all change types. Only an EXPLICIT
 matrix that omits one or more forensic types relative to the default is flagged as narrowly scoped. A scope
 whose matrix is set to DISABLED (empty type set) is also flagged because it explicitly turns off a scope that
-would otherwise be audited by default. See BUGS.md #54 for the upstream behaviour reference.
+would otherwise be audited by default. See DHIS2_ISSUES.md #54 for the upstream behaviour reference.
 """
 
 from __future__ import annotations

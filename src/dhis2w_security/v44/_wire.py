@@ -1,14 +1,14 @@
 """Version-specific wire extraction for the v44 security plugin (2FA + last login + route auth + tokens).
 
 v44 removed every admin-readable per-user 2FA field from the User resource
-(BUGS.md #58); 2FA enrolment is read via the superuser-only
+(DHIS2_ISSUES.md #58); 2FA enrolment is read via the superuser-only
 `/api/users/twoFactor` audit endpoints instead, so it is not requested here.
 
 The generated v44 `ApiToken` carries `type` as the `ApiTokenType` enum and `createdBy` as a `UserDto`
 (v41 differs on both); `tokens_from_raw` normalises `type` to a plain str and reads only the owner id, so
 `dhis2w_security.core.tokens` stays version-neutral and never imports `ApiTokenType`.
 
-The OAuth2 client wire shape diverges from v41 (BUGS.md #52, cross-referencing #39): v42+ have only the
+The OAuth2 client wire shape diverges from v41 (DHIS2_ISSUES.md #52, cross-referencing #39): v42+ have only the
 comma-string `Dhis2OAuth2Client` with the `clientId` identifier, while v41 has only the array-typed
 `OAuth2Client` with `cid`. The list envelope key is `oAuth2Clients` on every major, and there is no
 version-invariant generated schema. `oauth2_clients` validates each `oAuth2Clients[]` record through the v44

@@ -13,7 +13,7 @@ class SecuritySettings(BaseModel):
     field here. We don't reuse the full generated model for this read because it
     can't validate a live `/api/systemSettings` response: the endpoint returns
     `keyAnalysisDisplayProperty` lowercase (`"name"`), which the OAS
-    `DisplayProperty` enum rejects (BUGS.md #42). This projection omits that
+    `DisplayProperty` enum rejects (DHIS2_ISSUES.md #42). This projection omits that
     field, so it parses cleanly.
 
     The default `extra="ignore"` drops the rest of the settings object DHIS2

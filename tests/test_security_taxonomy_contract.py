@@ -10,7 +10,7 @@ define (`ABSENT_BY_VERSION`), each of which carries the live evidence.
 
 Whether `/api/authorities` answers at all is a property of the
 deployment, not of the major: some instances answer 500 on that route
-while another instance on the identical revision answers 200 (BUGS.md
+while another instance on the identical revision answers 200 (DHIS2_ISSUES.md
 #45). A 500 therefore skips with a message naming that entry rather
 than failing the run.
 
@@ -50,7 +50,7 @@ async def _fetch_inventory(base_url: str) -> set[str]:
     Network-level failures (`httpx2.RequestError`) and gateway outage statuses
     (502/503/504) skip. A 500 from `/api/authorities` skips too: the route is
     deployment-dependent, and an instance that refuses to enumerate its
-    authorities cannot validate the taxonomy either way (BUGS.md #45). Every
+    authorities cannot validate the taxonomy either way (DHIS2_ISSUES.md #45). Every
     other HTTP error status fails the test — a 401 must not turn into a green
     run that validated nothing.
     """
@@ -62,7 +62,7 @@ async def _fetch_inventory(base_url: str) -> set[str]:
     if response.status_code in _OUTAGE_STATUS_CODES:
         pytest.skip(f"play instance {base_url} down ({response.status_code})")
     if response.status_code == 500:
-        pytest.skip(f"{base_url}/api/authorities answers 500 on this deployment (BUGS.md #45)")
+        pytest.skip(f"{base_url}/api/authorities answers 500 on this deployment (DHIS2_ISSUES.md #45)")
     response.raise_for_status()
     body = response.json()
     return {entry["id"] for entry in body.get("systemAuthorities", [])}
