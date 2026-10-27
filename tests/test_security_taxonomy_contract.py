@@ -26,10 +26,12 @@ import pytest
 
 from dhis2w_security.core import AUTHORITY_CATEGORIES
 
+# Each `play.dhis2.org/2.4N` link redirects to the newest release of that major. 2.44 has no
+# release yet (its link redirects to the instance list), so v44 reads the `dev` channel.
 PLAY_URLS = {
-    "v41": "https://play.im.dhis2.org/dev-2-41",
-    "v42": "https://play.im.dhis2.org/dev-2-42",
-    "v43": "https://play.im.dhis2.org/dev-2-43",
+    "v41": "https://play.dhis2.org/2.41",
+    "v42": "https://play.dhis2.org/2.42",
+    "v43": "https://play.dhis2.org/2.43",
     "v44": "https://play.im.dhis2.org/dev",
 }
 
@@ -57,6 +59,9 @@ async def _fetch_inventory(base_url: str) -> set[str]:
     try:
         async with httpx2.AsyncClient(auth=("admin", "district"), timeout=30.0) as client:
             response = await client.get(f"{base_url}/api/authorities")
+            # httpx2 drops the credential on a cross-host redirect, so follow a version link by hand.
+            if response.is_redirect:
+                response = await client.get(response.headers["location"])
     except httpx2.RequestError as exc:
         pytest.skip(f"play instance {base_url} unreachable: {exc}")
     if response.status_code in _OUTAGE_STATUS_CODES:
