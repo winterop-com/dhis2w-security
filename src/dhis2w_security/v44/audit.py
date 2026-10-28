@@ -559,7 +559,7 @@ async def _run_routes(client: Dhis2Client) -> CheckResult:
 # secret `key` is @JsonIgnore upstream and never on the wire, so it is never requested or read.
 # paging=false is required so the full inventory is returned on instances with >50 tokens; without it
 # the response silently truncates to the first page and the inventory is incomplete.
-_TOKEN_FIELDS = "id,name,type,expire,created,createdBy[id],attributes[type,allowedIps,allowedMethods,allowedReferrers]"
+_TOKEN_FIELDS = "id,name,type,expire,created,createdBy[id],attributes[type,allowedIps,allowedMethods,allowedReferrers]"  # noqa: S105 - API field list
 
 
 async def _account_is_superuser(client: Dhis2Client) -> bool:

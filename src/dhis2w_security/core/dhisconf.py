@@ -65,7 +65,7 @@ _CONFIDENTIAL_KEYS: tuple[str, ...] = (
 _MATRIX_SEPARATOR = ";"
 
 # The literal token DHIS2 treats as "disable this scope"; documented in `AuditMatrixConfigurer.java` ~line 112.
-_DISABLED_TOKEN = "DISABLED"
+_DISABLED_TOKEN = "DISABLED"  # noqa: S105 - DHIS2 audit-scope keyword, not a credential
 
 
 class AuditScopeMatrix(BaseModel):
