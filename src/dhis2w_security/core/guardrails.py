@@ -125,7 +125,7 @@ CONNECT_PATHS: frozenset[str] = frozenset({"/", "/api/system/info"})
 # the most common live DHIS2 default (DefaultAdminUserPopulator seeds it on a
 # fresh install), so no other pairs are seeded.
 DEFAULT_PROBE_USERNAME = "admin"
-DEFAULT_PROBE_PASSWORD = "district"
+DEFAULT_PROBE_PASSWORD = "district"  # noqa: S105 - the public DHIS2 default the probe tests for
 
 # The credential probe's footprint, bounded as tightly as the contract allows:
 # at most one authentication attempt, against the identity endpoint only, never
